@@ -1,0 +1,19 @@
+kafka_bridge:
+  brokers:
+    - localhost:9092
+    - localhost:9093
+    - localhost:9094
+
+kafka_inventory_response:
+  topic: inventory-request-response
+  partition: 0
+
+kafka_inventory_request:
+  topic: inventory-request
+
+kafka_cart_request:
+  topic: cart-request
+  partition: 0
+
+kafka_cart_response:
+  topic: cart-request-response

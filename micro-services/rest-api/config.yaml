@@ -1,0 +1,8 @@
+kafka:
+  request_topic: cart-request
+  response_topic: cart-request-response
+  brokers:
+    - localhost:9092
+    - localhost:9093
+    - localhost:9094
+
