@@ -39,31 +39,38 @@ func NewKafkaCommunicator(name, consumeTopic, produceTopic string, consumePartit
 func (kc *KafkaCommunicator) Run(ctx context.Context) {
 	// run functions to listen on incoming kafka messages and incoming channel messages.
 	log.Printf("[debug] starting Communicator named %s", kc.name)
-
+	go kc.consume(ctx)
 	for {
 		select {
 		case <-ctx.Done():
 			log.Printf("[debug] recevied cancel signlar from context, shutting down Communicator %s", kc.name)
 			return
 		
-		case msg := <- kc.outChannel:
-			log.Println("[debug] recieved inside-response on Communicator %s", kc.name)
+		case msg := <- kc.inChannel:
+			log.Printf("[debug] recieved inside-response on Communicator %s", kc.name)
 			ctxSend, cancel := context.WithTimeout(ctx, 10*time.Second)
 			defer cancel()
 			
 			// sends message to kafka-topic
-			kc.producer.WriteMessages(ctxSend, msg)
-		
-		default:
-			msg, err := kc.consumer.ReadMessage(ctx)
+			log.Printf("[debug] sending message")
+			err := kc.producer.WriteMessages(ctxSend, msg)
+			log.Printf("%s", err)
+			log.Printf("[debug] message sent")
+		}
+	}
+}
+
+
+func (kc *KafkaCommunicator) consume(ctx context.Context) {
+	for {
+		msg, err := kc.consumer.ReadMessage(ctx)
 			log.Println("[debug] recieved outside-request on Communicator %s", kc.name)
 			if err != nil {
 				log.Println("[warning] got not ok from kafka, closing service")
-				return 
+				panic("got not ok from kafka, panicing..")
 			}
 			
-			// sending kafka message for further processing. 
-			kc.outChannel <- msg
-		}
+		// sending kafka message for further processing. 
+		kc.outChannel <- msg
 	}
 }

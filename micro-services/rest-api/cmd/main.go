@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"big-corp-shopping/rest-api/internal/api/cart"
 	"big-corp-shopping/rest-api/internal/api/health"
+	"big-corp-shopping/rest-api/internal/api/migration"
 	
 	"big-corp-shopping/rest-api/internal/cart_request_service"
 	_ "big-corp-shopping/rest-api/internal/config"
@@ -33,6 +34,9 @@ func main() {
 
 	// Mounting cart endpoints
 	r.Mount("/cart", cart.NewRouter())
+	
+	// Mounting migration endpoints
+	r.Mount("/migration", migration.NewRouter())
 
 	log.Println("Starting server on port 8080...")
 

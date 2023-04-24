@@ -44,6 +44,7 @@ func(cs *CartRequestService) Run (ctx context.Context) {
 	requestTopic := config.KafkaConfig.RequestTopic
 	kafkaBrokers := config.KafkaConfig.Brokers
 
+	log.Printf("%s", requestTopic)
 	// initializing kafka communicator
 	kafkaCommunicator, err := kafka_service.NewKafkaCommunicator("cart-request-communicator", responseTopic, requestTopic, 0, cs.requestChannel, cs.responseChannel, kafkaBrokers)
 	if err != nil {
@@ -91,10 +92,12 @@ func (cs *CartRequestService) listenForResponse (ctx context.Context) {
 				// removes entry
 				delete(cs.requests, cartRequestResponse.GetRequestID()) 
             } else {
+				log.Printf("[DEBUG] %s", cartRequestResponse)
 				log.Printf("[warning] could not find request with request id %s", cartRequestResponse.GetRequestID())
 			}
 			cs.mu.Unlock()
 		}
+
 	}
 }
 
@@ -107,7 +110,7 @@ func (cs *CartRequestService) NewCartRequest(userID string, action entity.Action
 	}
 
 	// creates cart request object
-	cartRequest := entity.NewCartRequest(userID, action, product, requestID)
+	cartRequest := entity.NewCartRequest(userID, action, product, requestID, quantity)
 
 	// makes request and gets response channel back
 	ch, err := cs.makeRequest(*cartRequest)
@@ -123,7 +126,7 @@ func (cs *CartRequestService) makeRequest(cartRequest entity.CartRequest) (chan 
 	ch := make(chan entity.CartRequestResponse, 1)
 
 	// converts cartRequest to binary so it can be sent via kafka
-	kafkaMsg, err := utils.ToKafkaMessage(config.KafkaConfig.RequestTopic, cartRequest)
+	kafkaMsg, err := utils.ToKafkaMessage(cartRequest)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"log"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 
@@ -22,9 +23,11 @@ type WebSocketMessage struct {
 
 
 func AddProductToCart(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("INVOKED")
 	// Decode the request body into a ProductPayload struct.
 	var payload entity.ProductPayload
-	err := json.NewDecoder(r.Body).Decode(&payload)
+	payloadHeader := []byte(r.Header.Get("payload"))
+	err := json.Unmarshal(payloadHeader, &payload)
 
 	// Check if decoding was successful.
 	if err != nil {
@@ -59,6 +62,7 @@ func AddProductToCart(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	// Waiting for response to be handled
+	log.Println("[info] waiting on response")
 	cartRequestResponse :=<- ch
 
 	// Marshaling response to it could be sent to client.

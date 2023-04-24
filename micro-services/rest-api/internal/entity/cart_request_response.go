@@ -1,20 +1,20 @@
 package entity 
 
 type CartRequestResponse struct {
-	requestID string 	`json:"request_id"`
-	statusCode int 		`json:"status_code"`
-	message string 		`json:"message"`
-	cart	Cart		`json:"cart"`
+	RequestID string 	`json:"request_id"`
+	StatusCode int 		`json:"status_code"`
+	Message string 		`json:"message"`
+	Cart	Cart		`json:"cart"`
 }
 
 func (response *CartRequestResponse) GetRequestID() string {
-    return response.requestID
+    return response.RequestID
 }
 
 func (response *CartRequestResponse) GetStatusCode() int {
-    return response.statusCode
+    return response.StatusCode
 }
 
 func (response *CartRequestResponse) GetMessage() string {
-    return response.message
+    return response.Message
 }

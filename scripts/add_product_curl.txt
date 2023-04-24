@@ -1,0 +1,27 @@
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "User-ID: TEST" \
+  -d '{
+        "product": {
+            "product_name": "TEST",
+            "product_code": "1"
+        },
+        "quantity": 1
+    }' \
+  localhost:8080/cart/add-product
+
+
+curl -i -N \
+  -H "User-ID: TEST" \
+  -H "Upgrade: websocket" \
+  -H "Connection: Upgrade" \
+  -H "Sec-WebSocket-Version: 13" \
+  -H "Sec-WebSocket-Key: $(openssl rand -base64 16)" \
+  localhost:8080/cart/add-product \
+  --data-binary '{
+        "product": {
+            "product_name": "test",
+            "product_code": "test"
+        },
+        "quantity": 1
+    }'

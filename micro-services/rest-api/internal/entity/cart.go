@@ -2,7 +2,7 @@ package entity
 import "time"
 
 type Cart struct {
-	userID 			string
-	productEntries 	map[string]ProductEntry
-	lastActivity 	time.Time
+	UserID 			string
+	ProductEntries 	map[string]ProductEntry
+	LastActivity 	time.Time
 }

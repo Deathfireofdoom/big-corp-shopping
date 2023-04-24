@@ -15,7 +15,6 @@ func NewKafkaProducer(topic string, brokerURLs[]string) (*kafka.Writer, error) {
 
     // create a new Kafka producer instance
     producer := kafka.NewWriter(config)
-
     return producer, nil
 }
 

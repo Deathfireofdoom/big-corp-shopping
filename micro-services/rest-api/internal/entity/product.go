@@ -6,14 +6,16 @@ type Product struct {
 }
 
 
-type ProductEntry struct {
-	product 	Product	`json:"product"`
-	quantity 	int		`json:"quantity"`
-	hold		bool	`json:"hold"`
-}
-
-
 type ProductPayload struct {
 	Product 	Product `json:"product"`
 	Quantity 	int 	`json:"quantity"`
 }
+
+
+type ProductEntry struct {
+	Product 	Product	`json:"product"`
+	Quantity 	int		`json:"quantity"`
+	Hold		bool	`json:"hold"`
+}
+
+

@@ -7,7 +7,7 @@ import (
 func NewRouter() *chi.Mux {
 	r := chi.NewRouter()
 
-	r.HandleFunc("/add-product", AddProductToCart)
+	r.Get("/add-product", AddProductToCart)
 	r.Delete("/", RemoveProductFromCart)
 
 	return r 

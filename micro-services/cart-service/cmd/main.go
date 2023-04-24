@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
-	"cart-service/cart"
+	"cart-service/internal/cart_service"
+	"context"
 )
 
 func main() {
-	cart.service
+	ctx := context.Background()
+	cart_service.Service.Run(ctx)
 }

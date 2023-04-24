@@ -6,3 +6,8 @@ kafka:
     - localhost:9093
     - localhost:9094
 
+postgres:
+  username: user
+  password: superDevPassword
+  host: localhost:5432
+  database: dev
