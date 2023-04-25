@@ -101,7 +101,7 @@ func (cs *CartRequestService) listenForResponse (ctx context.Context) {
 	}
 }
 
-func (cs *CartRequestService) NewCartRequest(userID string, action entity.Action, product entity.Product, quantity int) (chan entity.CartRequestResponse, error) {
+func (cs *CartRequestService) NewCartRequest(userID string, action entity.CartRequestAction, product entity.Product, quantity int) (chan entity.CartRequestResponse, error) {
 	// generate unique id 
 	requestID, err := utils.GetUniqueID()
 	if err != nil {

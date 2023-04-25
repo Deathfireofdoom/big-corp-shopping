@@ -6,16 +6,19 @@ import (
 	"log"
 
     "github.com/jackc/pgx/v4"
-	
+	"github.com/bsm/redislock"
+
 	// internal
+	"inventory/internal/redis_service"
 	"inventory/internal/config"
 )
 
 type DbService struct {
     db *pgx.Conn
+	redisService *redis_service.RedisService
 }
 
-func NewDbService() (*DbService, error) {
+func NewDbService(redisService *redis_service.RedisService) (*DbService, error) {
     // Create a new configuration object for the database connection.
 	// Open a connection to the Postgres database
 	ctx := context.Background()
@@ -31,7 +34,7 @@ func NewDbService() (*DbService, error) {
     }
 
     // Return a new DbService with the open connection.
-    return &DbService{conn}, nil
+    return &DbService{db: conn, redisService: redisService}, nil
 }
 
 func (s *DbService) Close() error {
@@ -49,9 +52,18 @@ func (s *DbService) PutOnHold(productCode string, quantity int, userID string) (
 }
 
 func (s *DbService) hold(productCode string, quantity int, userID string, withLock bool) (int, error) {
+	var lock *redislock.Lock
+	var err error
+	
 	if (withLock) {
 		// checks out lock from redis.
 		log.Printf("[info] making transaction with lock")
+		lock, err = s.redisService.AcquireLock(productCode, 20)
+		if err != nil {
+			log.Printf("[error] could not acquire lock from redis for product %s", productCode)
+			log.Printf("[error] %s", err)
+			return -1, err
+		}
 	}
 
 
@@ -63,7 +75,13 @@ func (s *DbService) hold(productCode string, quantity int, userID string, withLo
     }
 
 	// adds the hold-entry to the hold table
-	_, err = tx.Exec(ctx, "INSERT INTO hold (created_at, user_id, product_code, quantity) VALUES (NOW(), $1, $2, $3)", userID, productCode, quantity)
+	_, err = tx.Exec(ctx, `
+    INSERT INTO hold (created_at, user_id, product_code, quantity)
+    VALUES (NOW(), $1, $2, $3)
+    ON CONFLICT (user_id, product_code) DO UPDATE
+    SET created_at = NOW(),
+        quantity = GREATEST(hold.quantity + $3, 0)
+							`, userID, productCode, quantity)
 	if err != nil {
 		log.Printf("[warning] failed instering into hold-table: %s", err)
 		tx.Rollback(ctx)
@@ -95,7 +113,14 @@ func (s *DbService) hold(productCode string, quantity int, userID string, withLo
 		}
 		
 		// returns lock to redis
-		log.Printf("[TODO] implement returning lock to redis.")
+		log.Printf("[debug] returning lock to redis")
+		err = lock.Release(context.Background())
+		if err != nil {
+			log.Printf("[error] could not return lock for product %s", productCode)
+			log.Printf("[error] %s", err)
+		} else {
+			log.Printf("[debug] returned lock to redis")
+		}
 		
 	} else {
 		if (inventoryCount < 5) {

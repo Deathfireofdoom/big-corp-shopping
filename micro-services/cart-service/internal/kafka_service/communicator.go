@@ -25,7 +25,7 @@ func NewKafkaCommunicator(name, consumeTopic, produceTopic string, consumePartit
 	}
 
 	// creates a consumer for consuming messages from kafka
-	consumer := NewKafkaConsumer(consumeTopic, consumePartition, brokers)
+	consumer := NewKafkaConsumer(name, consumeTopic, consumePartition, brokers)
 	
 	return &KafkaCommunicator{
 		name: name,
@@ -52,7 +52,10 @@ func (kc *KafkaCommunicator) Run(ctx context.Context) {
 			defer cancel()
 			
 			// sends message to kafka-topic
-			kc.producer.WriteMessages(ctxSend, msg)
+			err := kc.producer.WriteMessages(ctxSend, msg)
+			if err != nil {
+				log.Printf("[warning] could not write message to kafka: %s", err)
+			}
 		}
 	}
 }

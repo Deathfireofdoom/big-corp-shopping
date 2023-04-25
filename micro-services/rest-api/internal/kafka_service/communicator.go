@@ -25,7 +25,7 @@ func NewKafkaCommunicator(name, consumeTopic, produceTopic string, consumePartit
 	}
 
 	// creates a consumer for consuming messages from kafka
-	consumer := NewKafkaConsumer(consumeTopic, consumePartition, brokers)
+	consumer := NewKafkaConsumer(name, consumeTopic, consumePartition, brokers)
 	
 	return &KafkaCommunicator{
 		name: name,
@@ -52,25 +52,30 @@ func (kc *KafkaCommunicator) Run(ctx context.Context) {
 			defer cancel()
 			
 			// sends message to kafka-topic
-			log.Printf("[debug] sending message")
+			log.Printf("MESSAGE: %s", msg)
 			err := kc.producer.WriteMessages(ctxSend, msg)
-			log.Printf("%s", err)
-			log.Printf("[debug] message sent")
+			if err != nil {
+				log.Printf("[warning] could not write message to kafka: %s", err)
+			}
 		}
 	}
 }
 
 
 func (kc *KafkaCommunicator) consume(ctx context.Context) {
+	log.Printf("[debug] consuming message from %s", kc.consumer.Config().Topic)
 	for {
 		msg, err := kc.consumer.ReadMessage(ctx)
-			log.Println("[debug] recieved outside-request on Communicator %s", kc.name)
+		log.Printf("[debug] recieved a message on topic %s", kc.consumer.Config().Topic)
+		log.Println("[debug] recieved outside-request on Communicator %s", kc.name)
 			if err != nil {
 				log.Println("[warning] got not ok from kafka, closing service")
 				panic("got not ok from kafka, panicing..")
 			}
-			
+		
+
 		// sending kafka message for further processing. 
 		kc.outChannel <- msg
 	}
+	log.Printf("[warning] turning of kafka-consumer")
 }

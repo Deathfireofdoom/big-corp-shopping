@@ -11,3 +11,8 @@ postgres:
   password: superDevPassword
   host: localhost:5432
   database: dev
+
+redis:
+  host: localhost:6379
+  password: superDevPassword
+  database: 0

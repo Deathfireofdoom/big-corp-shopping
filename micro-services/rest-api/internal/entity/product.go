@@ -18,4 +18,3 @@ type ProductEntry struct {
 	Hold		bool	`json:"hold"`
 }
 
-

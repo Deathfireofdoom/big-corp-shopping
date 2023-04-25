@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"encoding/json"
 	"log"
-	"fmt"
 
 	"github.com/gorilla/websocket"
 
@@ -22,8 +21,7 @@ type WebSocketMessage struct {
 }
 
 
-func AddProductToCart(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("INVOKED")
+func UpdateProductToCart(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body into a ProductPayload struct.
 	var payload entity.ProductPayload
 	payloadHeader := []byte(r.Header.Get("payload"))
@@ -46,13 +44,25 @@ func AddProductToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Make a new subscription
-	ch, err := cart_request_service.Service.NewCartRequest(userID, entity.Add, product, quantity)
+
+	// Make a new request
+	var cartRequestAction entity.CartRequestAction
+	if quantity == 0 {
+		cartRequestAction = entity.CartRequestCheck
+	} else if quantity < 0 {
+		cartRequestAction = entity.CartRequestDelete
+	} else {
+		cartRequestAction = entity.CartRequestAdd
+	}
+
+	ch, err := cart_request_service.Service.NewCartRequest(userID, cartRequestAction, product, quantity)
 	if err != nil {
 		http.Error(w, "Serverside error.", http.StatusBadRequest)
 		return
 	}
-
+	if cartRequestAction == entity.CartRequestDelete {
+		return
+	}
 	// Upgrade the HTTP connection to a WebSocket connection
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

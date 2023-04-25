@@ -8,6 +8,8 @@ import (
 	// internal
 	"inventory/internal/entity"
 	"inventory/internal/db"
+	"inventory/internal/redis_service"
+
 )
 
 
@@ -18,8 +20,8 @@ type InventoryWorker struct {
 	db				*db.DbService
 }
 
-func NewInventoryWorker(id string, requestChannel chan entity.InventoryRequest, responseChannel	chan entity.InventoryRequestResponse) *InventoryWorker {
-	db, err := db.NewDbService()
+func NewInventoryWorker(id string, requestChannel chan entity.InventoryRequest, responseChannel	chan entity.InventoryRequestResponse, redisService *redis_service.RedisService) *InventoryWorker {
+	db, err := db.NewDbService(redisService)
 	if err != nil {
 		log.Printf("[error] could not connect to database: %s", err)
 		panic(err)
@@ -56,7 +58,7 @@ func (iw *InventoryWorker) handleRequest(request entity.InventoryRequest) {
     
 	case entity.InventoryRequestRelease:
 		log.Printf("[debug] go release request on worker %s", iw.id)
-		log.Printf("[TODO] release is not implemented")
+		iw.putOnHold(request)
     
 	case entity.InventoryRequestFinalize:
 		log.Printf("[debug] go finalize request on worker %s", iw.id)

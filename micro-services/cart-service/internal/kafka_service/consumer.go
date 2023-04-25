@@ -6,11 +6,12 @@ import (
     "github.com/segmentio/kafka-go"
 )
 
-func NewKafkaConsumer(topic string, partition int, brokers []string) *kafka.Reader {
+func NewKafkaConsumer(consumerGroup, topic string, partition int, brokers []string) *kafka.Reader {
     // create a new Kafka reader with the specified configuration
     reader := kafka.NewReader(kafka.ReaderConfig{
         Topic:     topic,
         Partition: partition,
+        GroupID:   consumerGroup,
         MinBytes:  10e3,
         MaxBytes:  10e6,
         Brokers:   brokers,

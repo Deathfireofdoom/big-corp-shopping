@@ -21,6 +21,13 @@ type postgresConfig struct {
 	Database	string	`mapstructure:"database"`
 }
 
+var RedisConfig redisConfig
+type redisConfig struct {
+	Host		string	`mapstructure:"host"`
+	Password	string	`mapstructure:"password"`
+	Database	int		`mapstructure:"database"`
+}
+
 // init loads the config and saves it into variables that is exported from the
 // config package.
 func init() {
@@ -42,5 +49,10 @@ func init() {
 	err = viper.UnmarshalKey("postgres", &PostgresConfig)
 	if err != nil {
 		panic(fmt.Errorf("could not unmarshal key postgres: %s", err))
+	}
+
+	err = viper.UnmarshalKey("redis", &RedisConfig)
+	if err != nil {
+		panic(fmt.Errorf("could not unmarshal key redis: %s", err))
 	}
 }

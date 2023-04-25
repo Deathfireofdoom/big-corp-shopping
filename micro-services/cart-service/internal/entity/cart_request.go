@@ -24,6 +24,15 @@ const (
 	CartRequestDelete	CartRequestAction = "delete"
 )
 
+func NewCartRequestResponseFromCartRequest(cartRequest CartRequest, cart Cart) CartRequestResponse {
+	return CartRequestResponse{
+		RequestID: cartRequest.RequestID,
+		StatusCode: 200,
+		Message: "cart-check",
+		Cart: cart,
+	}
+}
+
 func NewCartRequestResponseFromInventoryResponse(inventoryRequestResponse InventoryRequestResponse, cart Cart) CartRequestResponse {
 	return CartRequestResponse{
 		RequestID: inventoryRequestResponse.Request.RequestID,

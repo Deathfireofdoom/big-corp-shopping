@@ -13,12 +13,8 @@ import (
 	"inventory/internal/kafka_service"
 	"inventory/internal/config"
 	"inventory/internal/utils"
+	"inventory/internal/redis_service"
 )
-
-// todo 21 april
-// fill database with data
-// rewrite the run-function in this file
-// star the service in main.go
 
 type InventoryService struct {
 	workerPool 				map[string]*InventoryWorker
@@ -30,11 +26,13 @@ func NewInventoryService() *InventoryService{
 	workerRequestChannel := make(chan entity.InventoryRequest, 10)
 	workerResponseChannel := make(chan entity.InventoryRequestResponse, 10)
 
+	// redis service used by worker
+	redisService := redis_service.NewRedisService(config.RedisConfig.Host, config.RedisConfig.Password, config.RedisConfig.Database)
 
 	workerPool := map[string]*InventoryWorker{}
 	for i:=0; i < 5; i++ {
 		id, _ := utils.GetUniqueID()
-		workerPool[id] = NewInventoryWorker(id, workerRequestChannel, workerResponseChannel)
+		workerPool[id] = NewInventoryWorker(id, workerRequestChannel, workerResponseChannel, redisService)
 	}
 
 	return &InventoryService{

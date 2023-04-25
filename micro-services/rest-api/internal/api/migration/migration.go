@@ -48,6 +48,7 @@ func initializeInventory() {
 		product_code VARCHAR(100) NOT NULL,
 		quantity INTEGER NOT NULL
 		);
+        ALTER TABLE hold ADD CONSTRAINT hold_user_product_key UNIQUE (user_id, product_code);
     `
     _, err = conn.Exec(ctx, createTable)
     if err != nil {

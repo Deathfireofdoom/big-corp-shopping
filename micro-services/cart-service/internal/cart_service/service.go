@@ -59,17 +59,22 @@ func (c *CartService) Run(ctx context.Context) error {
 				return nil
 			
 			case <-tickerChannel:
-				log.Println("[debug] system info:")
-				log.Printf("%s", c)
+				c.printMonitoringInfo()
 
 			case msg :=<- cartRequestOutChannel:
 				log.Printf("[debug] recevied message from cart-request")
-				kafkaMsg, err := c.handleCartRequest(msg)
+				kafkaMsg, directResponse, err := c.handleCartRequest(msg)
 				if err != nil {
 					log.Printf("[error] %s", err)
 					continue
 				}
-				inventoryRequestInChannel <- *kafkaMsg
+
+				if directResponse {
+					cartRequestInChannel <- *kafkaMsg
+				} else {
+					inventoryRequestInChannel <- *kafkaMsg
+				}
+
 			
 			case msg :=<- inventoryRequestOutChannel:
 				log.Printf("[debug] recevied message from inventory-request")

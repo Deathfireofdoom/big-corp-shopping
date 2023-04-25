@@ -28,7 +28,7 @@ func (c *CartService) handleInventoryResponse(msg kafka.Message) (*kafka.Message
 		switch inventoryRequestResponse.Request.Action {
 		case entity.InventoryRequestHold:
 			log.Printf("[debug] got sucessful response from inventory-service for request %s for user %s", inventoryRequestResponse.Request.RequestID, inventoryRequestResponse.Request.UserID)
-			err := c.applyInventoryRequest(inventoryRequestResponse)
+			err := c.applyInventoryRequest(inventoryRequestResponse.Request)
 			if err != nil {
 				log.Printf("[warning] something whent wrong applying inventory request %s", err)
 				inventoryRequestResponse.StatusCode = 501
@@ -65,10 +65,7 @@ func (c *CartService) handleInventoryResponse(msg kafka.Message) (*kafka.Message
 
 // applyInventoryRequest applies inventory request and sends back kafka-message if the new quantity is above 
 // 0. The logic behind this is that the user will not be waiting for realesing-holds, only applying holds.
-func (c *CartService) applyInventoryRequest(inventoryRequestResponse entity.InventoryRequestResponse) (error) {
-	// extracts original inventoryRequest
-	inventoryRequest := inventoryRequestResponse.Request
-	
+func (c *CartService) applyInventoryRequest(inventoryRequest entity.InventoryRequest) (error) {
 	// get cart by user id
 	cartHandle, _, err := c.getCartHandleByUserID(inventoryRequest.UserID)
 	if err != nil {
@@ -114,11 +111,14 @@ func (c *CartService) applyInventoryRequest(inventoryRequestResponse entity.Inve
 		if !ok {
 			log.Printf("[warning] request tries to delete products that does not have a entry in cart, requestID %s", inventoryRequest.RequestID)
 		}
-		delete(cart.ProductEntries, productEntry.Product.Code, ) 
+		delete(cart.ProductEntries, productEntry.Product.Code)
 	} else {
 		// adding / updating the product entry
 		cart.ProductEntries[productEntry.Product.Code] = productEntry
 	}
+
+	// removing pending request
+	delete(cart.PendingRequests, inventoryRequest.RequestID)
 
 	// updates last-acitvity # TODO put this logic on the cart object, not here
 	log.Printf("[debug] updating cart")
@@ -127,6 +127,8 @@ func (c *CartService) applyInventoryRequest(inventoryRequestResponse entity.Inve
 	// updating cart handle with new cart
 	cartHandle.Cart = cart
 
+
+	
 	// updating the cart-service with the new updated cart
 	log.Printf("[debug] updating cart handle")
 	c.updateCartHandle(cartHandle)

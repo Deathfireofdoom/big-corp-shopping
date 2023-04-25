@@ -1,14 +1,14 @@
 package entity
 
 type CartRequest struct {
-	RequestID 	string 		`json:"request_id"`
-	UserID 		string 		`json:"user_id"`
-	Action		Action		`json:"action"` 
-	Product 	Product 	`json:"product"`
-	Quantity	int			`json:"quantity"`
+	RequestID 	string 				`json:"request_id"`
+	UserID 		string 				`json:"user_id"`
+	Action		CartRequestAction	`json:"action"` 
+	Product 	Product 			`json:"product"`
+	Quantity	int					`json:"quantity"`
 }
 
-func NewCartRequest(userID string, action Action, product Product, requestID string, quantity int) *CartRequest {
+func NewCartRequest(userID string, action CartRequestAction, product Product, requestID string, quantity int) *CartRequest {
 	return &CartRequest{
 		RequestID: requestID,
 		Action: action,
@@ -22,9 +22,10 @@ func(cr *CartRequest) GetRequestID() string {
 	return cr.RequestID
 }
 
-type Action string
+type CartRequestAction string
 const (
-	Add 	Action = "add"
-	Delete 	Action = "delete"
-	Check 	Action = "check"
+	CartRequestAdd 		CartRequestAction = "add"
+	CartRequestOrder 	CartRequestAction = "order"
+	CartRequestCheck	CartRequestAction = "check"
+	CartRequestDelete	CartRequestAction = "delete"
 )
