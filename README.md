@@ -42,8 +42,6 @@ _When removing a product, the request will be applied to the cart directly and r
 
 Since the cart-service works asynchronously, each `cart` is stored in a `cartHandle` that has a `mutex` lock. This way, we can avoid any races. Every time a change is being made to the cart-object, the mutex-lock is checked out.
 
-
-
 ## Inventory service
 The `inventory-service` plays a crucial role in ensuring that a user cannot add an out-of-stock product to their cart. When the `cart-service` receives a request to add a product to a cart, it publishes an `inventory-request` to Kafka. The `inventory-service` listens for these requests and checks the product's availability before placing a hold on it, if possible. Once the inventory status has been determined, the `inventory-service` sends the result back to the `cart-service` via Kafka.
 
@@ -58,6 +56,15 @@ The `inventory-service` relies on a database that contains two primary tables an
 ### Avoiding Negative Inventory Counts due to Concurrent Holds
 
 To prevent negative inventory counts caused by concurrent writes to the `hold` table, the `inventory-service` employs distributed locks with Redis. If the requested hold quantity is greater than five or the available inventory count after the hold is less than five, the `inventory-service` requires the workers to check out the Redis lock for that product code. This approach enables concurrent writes for high-stock products while avoiding negative inventory counts for low-stock products.
+
+
+## Prediction service - to be added
+This services will consume add-product events, do a simple prediction on similar products that are bought togehter and send back the result to the rest-api.
+
+
+## Order service - to be added
+
+
 
 ## Infrastructure
 Below is a description of the infrastructure used for this microservice architecture.
