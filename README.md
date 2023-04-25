@@ -4,6 +4,14 @@ This project serves as a demonstration of the power of Go's concurrency and the 
 
 The repository encompasses the entire microservice architecture, with infrastructure residing in the `/infrastructure` directory and microservices residing in `/micro-services`.
 
+
+## High Level Architecture
+The microservice architecture consists of several services, including the Rest API, Cart service, Inventory service, Prediction service (to be added), and Order service (to be added). The Rest API acts as the bridge between the outside world and the microservices and provides easy endpoints for frontend developers to integrate a shopping-cart feature into their online shop. The Cart service manages the shopping carts of users, while the Inventory service ensures that a user cannot add an out-of-stock product to their cart. The Prediction service, which is yet to be added, will consume add-product events, do a simple prediction on similar products that are bought together, and send back the result to the Rest API. The Order service, which is also yet to be added, will handle the orders placed by the users.
+
+The infrastructure of this microservice architecture uses Postgres to store information about the inventory, as it is naturally tabular in format and requires a SQL database. Kafka serves as the backbone and heart of the system, enabling asynchronous communication between the components. Redis was added to the mix primarily to provide distributed mutex locks, which prevent race conditions on a distributed level, ensuring a scalable and reliable distributed system.
+
+Overall, this microservice architecture is designed to be scalable, distributed, and reliable, thanks to the use of advanced technologies like Kafka and Redis, and it can handle a high volume of requests while maintaining high performance.
+
 ## Services
 Below is a description of each service that is currently avaiable.
 
