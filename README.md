@@ -1,4 +1,7 @@
 # BIG-CORP-SHOPPING
+
+_Disclaimer: 2023-04-26 currently working on this project, so it is not perfect yet_
+
 ## Overview
 This project serves as a demonstration of the power of Go's concurrency and the capabilities of building high-performance distributed systems by combining Go's native concurrency support with technologies like Kafka and Redis.
 
